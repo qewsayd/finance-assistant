@@ -14,6 +14,7 @@ import {
   saveLocalUser,
   setLocalSession,
 } from '../services/localStore';
+import { mapFirebaseError } from '../utils/firebaseErrors';
 
 const AuthContext = createContext(null);
 
@@ -78,7 +79,7 @@ export function AuthProvider({ children }) {
       setLocalSession(session);
       setUser(session);
     } catch (err) {
-      setError(err.message || 'Ошибка регистрации');
+      setError(mapFirebaseError(err) || 'Ошибка регистрации');
       throw err;
     }
   };
@@ -100,7 +101,7 @@ export function AuthProvider({ children }) {
       setLocalSession(session);
       setUser(session);
     } catch (err) {
-      setError(err.message || 'Ошибка входа');
+      setError(mapFirebaseError(err) || 'Ошибка входа');
       throw err;
     }
   };
@@ -122,7 +123,7 @@ export function AuthProvider({ children }) {
       setLocalSession(demoUser);
       setUser(demoUser);
     } catch (err) {
-      setError(err.message || 'Ошибка входа через Google');
+      setError(mapFirebaseError(err) || 'Ошибка входа через Google');
       throw err;
     }
   };

@@ -5,6 +5,7 @@ import {
   doc,
   onSnapshot,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
@@ -48,7 +49,10 @@ export async function createOperation(userId, data) {
     return op.id;
   }
 
-  const ref = await addDoc(opsCollection(userId), payload);
+  const ref = await addDoc(opsCollection(userId), {
+    ...payload,
+    createdAt: serverTimestamp(),
+  });
   return ref.id;
 }
 

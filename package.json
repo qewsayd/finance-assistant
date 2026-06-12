@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "firebase:rules": "firebase deploy --only firestore:rules",
+    "firebase:hosting": "npm run build && firebase deploy --only hosting"
   },
   "dependencies": {
     "date-fns": "^4.1.0",

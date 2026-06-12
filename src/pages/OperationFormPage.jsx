@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EXPENSE_CATEGORIES } from '../utils/categories';
 import { monthKey } from '../utils/format';
+import { useToast } from '../context/ToastContext';
 import { useOperations } from '../hooks/useOperations';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -10,7 +11,8 @@ export default function OperationFormPage() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
-  const { operations, add, update } = useOperations();
+  const { show } = useToast();
+  const { operations, loading, add, update } = useOperations();
 
   const existing = isEdit ? operations.find((op) => op.id === id) : null;
 
@@ -63,8 +65,10 @@ export default function OperationFormPage() {
     try {
       if (isEdit) {
         await update(id, payload);
+        show('Операция обновлена', 'success');
       } else {
         await add(payload);
+        show('Операция добавлена', 'success');
       }
       navigate('/');
     } catch (err) {
@@ -74,7 +78,15 @@ export default function OperationFormPage() {
     }
   };
 
-  if (isEdit && operations.length > 0 && !existing) {
+  if (isEdit && loading) {
+    return (
+      <div className="page-center">
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  if (isEdit && !loading && !existing) {
     return (
       <div className="page">
         <p className="banner error">Операция не найдена</p>
@@ -87,7 +99,14 @@ export default function OperationFormPage() {
 
   return (
     <div className="page">
-      <h1>{isEdit ? 'Редактирование' : 'Новая операция'}</h1>
+      <div className="page-head">
+        <div>
+          <h1>{isEdit ? 'Редактирование' : 'Новая операция'}</h1>
+          <p className="page-subtitle">
+            {type === 'income' ? 'Запись дохода' : 'Запись расхода'}
+          </p>
+        </div>
+      </div>
 
       {formError && <p className="banner error">{formError}</p>}
 
@@ -98,14 +117,14 @@ export default function OperationFormPage() {
             className={type === 'income' ? 'active income' : ''}
             onClick={() => setType('income')}
           >
-            Доход
+            ↑ Доход
           </button>
           <button
             type="button"
             className={type === 'expense' ? 'active expense' : ''}
             onClick={() => setType('expense')}
           >
-            Расход
+            ↓ Расход
           </button>
         </div>
 
@@ -119,6 +138,7 @@ export default function OperationFormPage() {
             onChange={(e) => setAmount(e.target.value)}
             required
             placeholder="1000"
+            autoFocus
           />
         </label>
 
@@ -135,16 +155,19 @@ export default function OperationFormPage() {
         {type === 'expense' && (
           <label>
             Категория
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
+            <div className="category-grid">
               {EXPENSE_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`category-chip ${category === cat.id ? 'active' : ''}`}
+                  onClick={() => setCategory(cat.id)}
+                >
+                  <span>{cat.icon}</span>
                   {cat.label}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </label>
         )}
 
@@ -154,7 +177,7 @@ export default function OperationFormPage() {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
-            placeholder="Необязательно"
+            placeholder="Например: зарплата, продукты, проездной…"
           />
         </label>
 

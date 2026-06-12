@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import UserAvatar from './UserAvatar';
 
 const nav = [
   { to: '/', label: 'Бюджет', end: true },
@@ -29,6 +30,7 @@ export default function Layout() {
         </div>
         <div className="header-actions">
           <ThemeToggle />
+          <UserAvatar name={user?.name} />
           <span className="user-name">{user?.name}</span>
           <button type="button" className="btn-text" onClick={handleLogout}>
             Выйти

@@ -1,84 +1,105 @@
-# Финансовый помощник
+# ФинПомощник
 
-Веб-приложение для учёта личных доходов и расходов. Проект для производственной практики (3 курс, «Разработка приложений») по [техническому заданию](https://reunionrs.github.io/students/#course-3-apps/finance).
+Веб-приложение для учёта личных доходов и расходов. Проект для производственной практики (3 курс) по [техническому заданию](https://reunionrs.github.io/students/#course-3-apps/finance).
 
-**Стек:** React, Vite, React Router, Firebase (Auth + Firestore), Recharts.
+**Стек:** React 19, Vite, React Router, Firebase (Auth + Firestore), Recharts.
 
-## Возможности (MVP по ТЗ)
+## Возможности
 
-- Регистрация и вход (email/пароль)
+- Регистрация и вход (email / пароль)
 - Вход через Google (Firebase Authentication)
 - Главный экран: баланс, доходы и расходы за месяц
 - Добавление дохода и расхода с датой и комментарием
-- Категории расходов: питание, транспорт, покупки, развлечения, другое
+- Категории: питание, транспорт, покупки, развлечения, другое
 - История операций с фильтром по месяцу
-- Итоги и круговая диаграмма расходов по категориям
+- Статистика: итоги, круговая диаграмма, доли по категориям
 - Редактирование и удаление операций
 - Светлая и тёмная тема
 - Данные отдельно для каждого пользователя
 - Проверка: сумма операции > 0
 
-## Запуск
-
-1. Установите [Node.js](https://nodejs.org/) (LTS).
-2. В папке проекта:
+## Быстрый старт
 
 ```bash
 npm install
 npm run dev
 ```
 
-3. Откройте адрес из терминала (обычно `http://localhost:5173`).
+Откройте http://localhost:5173
 
-### Firebase (для сдачи с Google и облачным хранением)
+Или дважды щёлкните `start.bat`.
 
-1. Создайте проект в [Firebase Console](https://console.firebase.google.com/).
-2. Включите **Authentication** → Email/Password и **Google**.
-3. Создайте приложение Web и скопируйте конфиг.
-4. Включите **Cloud Firestore** (режим test или правила для учебного проекта).
-5. Скопируйте `.env.example` в `.env` и заполните переменные `VITE_FIREBASE_*`.
+## Настройка Firebase
 
-Правила Firestore (учебный вариант):
+### Автоматически (рекомендуется)
 
+Дважды щёлкните **`setup-firebase.bat`** и введите ключи из Firebase Console.
+
+### Вручную
+
+1. Создайте проект на https://console.firebase.google.com/
+2. **Authentication** → включите **Email/Password** и **Google**
+3. **Firestore Database** → создайте базу
+4. **Project settings** → Web app → скопируйте конфиг в `.env`:
+
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /operations/{opId} {
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-    }
-  }
-}
+
+5. Задеплойте правила Firestore:
+
+```bash
+npx firebase login
+npx firebase use ВАШ_PROJECT_ID
+npm run firebase:rules
 ```
 
-Без `.env` приложение работает в **локальном режиме** (localStorage): можно регистрироваться по email и тестировать все экраны; кнопка Google создаёт демо-пользователя.
+6. Перезапустите `npm run dev` — в шапке появится бейдж **☁️ Облако**.
+
+### Правила Firestore
+
+Файл `firestore.rules` уже в проекте. Каждый пользователь видит только свои операции.
+
+## Деплой на Firebase Hosting
+
+```bash
+npm run firebase:hosting
+```
 
 ## Сценарий проверки (из ТЗ)
 
-1. Создать аккаунт и войти.
-2. Добавить один доход и несколько расходов в разных категориях.
-3. Убедиться, что баланс на главной верный.
-4. Открыть «Статистика» — проверить итоги и диаграмму.
-5. Изменить и удалить операцию в «Истории».
-6. Обновить страницу — данные сохранены.
-7. Войти через Google (при настроенном Firebase).
-8. Переключить светлую/тёмную тему.
+1. Создать аккаунт и войти
+2. Добавить доход и несколько расходов
+3. Проверить баланс на главной
+4. Открыть «Статистика» — диаграмма и итоги
+5. Изменить и удалить операцию
+6. Обновить страницу — данные сохранены
+7. Войти через Google (при настроенном Firebase)
+8. Переключить светлую/тёмную тему
 
 ## Структура
 
 ```
 src/
   components/   — UI-компоненты
-  context/      — авторизация и тема
+  context/      — авторизация, тема, уведомления
   hooks/        — операции и расчёты
   pages/        — экраны приложения
   services/     — Firestore / localStorage
-  utils/        — категории, форматирование
+  utils/        — категории, форматирование, ошибки Firebase
+firestore.rules — правила безопасности
+firebase.json   — конфиг Firebase
 ```
+
+## GitHub
+
+Репозиторий: https://github.com/qewsayd/finance-assistant
 
 ## Важно
 
-Приложение — учебный дневник бюджета. Не используйте реальные банковские карты и платёжные данные. Не даёт инвестиционных или банковских рекомендаций.
+Учебный дневник бюджета. Не используйте реальные банковские карты. Не даёт инвестиционных рекомендаций.
